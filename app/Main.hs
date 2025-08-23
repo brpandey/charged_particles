@@ -82,7 +82,23 @@ updateBall balls b =
       -- Update velocity and position
       newVel = vadd (vel b) $ vscale timeStep accForce
       newPos = vadd (pos b) $ vscale timeStep newVel
-   in b {pos = newPos, vel = newVel}
+
+      -- Update position if ball is close enough to walls, simulating bouncing
+      window = (vinit [fromIntegral width / 2, fromIntegral height / 2])
+      (position, velocity) = checkWall newPos newVel window (radius b)
+   in b {pos = position, vel = velocity}
+
+checkWall :: (VectorSpace v) => v -> v -> v -> Float -> (v, v)
+checkWall pos vel bound radius = (vinit pos', vinit vel')
+  where
+    (pos', vel') = unzip $ vmap3 wallAdjust pos vel bound
+    wallAdjust :: Float -> Float -> Float -> (Float, Float)
+    wallAdjust p v b
+      -- if wall is hit, flip the velocity (given each coord dimension)
+      -- position ball right at wall edge
+      | p - radius < (-b) = (-b + radius, -v)
+      | p + radius > b = (b - radius, -v)
+      | otherwise = (p, v)
 
 forceOn :: (VectorSpace v) => Ball v -> Ball v -> v
 forceOn Ball {pos = p1, charge = q1} Ball {pos = p2, charge = q2} =

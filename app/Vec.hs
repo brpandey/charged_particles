@@ -18,6 +18,9 @@ class VectorSpace v where
   vlen :: v -> Float -- magnitude
   vnorm :: v -> v -- normalized vector (unit length)
   vext :: Float -> v -- extend scalar
+  vmap :: (Float -> a) -> v -> [a] -- maps over components
+  vmap2 :: (Float -> Float -> a) -> v -> v -> [a]
+  vmap3 :: (Float -> Float -> Float -> a) -> v -> v -> v -> [a]
 
 instance VectorSpace Vec2 where
   vzero = Vec2 (0, 0)
@@ -34,3 +37,6 @@ instance VectorSpace Vec2 where
     let m = vlen v
      in if m == 0 then Vec2 (0, 0) else Vec2 (x / m, y / m)
   vext s = Vec2 (s, s)
+  vmap f (Vec2 (x, y)) = [f x, f y]
+  vmap2 f (Vec2 (a, b)) (Vec2 (c, d)) = [f a c, f b d]
+  vmap3 func (Vec2 (a, b)) (Vec2 (c, d)) (Vec2 (e, f)) = [func a c e, func b d f]
