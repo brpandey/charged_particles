@@ -1,15 +1,16 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module BallPhysics
+module Ball
   ( Ball (..),
     initBalls,
     drawBall,
+    drawHalo,
     updateBall,
   )
 where
 
 import Graphics.Gloss
-import Vec (Vec2 (..), VectorSpace (..))
+import Vec (VectorSpace (..))
 
 -- akin to Coulomb constant determines strength of force
 chargeConstant :: Float
@@ -39,11 +40,33 @@ initBalls vctor =
   ]
 
 drawBall :: (VectorSpace v) => Ball v -> Picture
-drawBall Ball {..} = ball
+drawBall Ball {..} = Pictures [label, ball]
   where
     (x, y) = (vx pos, vy pos)
-    --- translate: move picture by (x, y)
+    offset = radius + 5
+    showCharge c = (if c >= 0 then "+" else "") ++ take 5 (show c)
     ball = translate x y $ color col $ circleSolid radius
+    label = translate x (offset + y) $ color white $ scale 0.1 0.1 $ Text (showCharge charge)
+
+-- Draw halo whose size and opacity reflects force magnitude
+drawHalo :: (VectorSpace v, Eq v) => Float -> Ball v -> [Ball v] -> Picture
+drawHalo t b balls =
+  let accForce = sumForceOn b balls
+      mag = vmag accForce
+
+      -- pulse directly dependant on force magnitude
+      pulse = 0.3 + 0.5 * abs (sin (t * 4 + mag))
+
+      -- Halo variable circle size and variable thickness pulses with force strength
+      radiusPulse = radius b + 5 + 4 * pulse * (1 + min mag 0.01)
+      thicknessPulse = 2 + 2 * pulse * min mag 20
+
+      alpha = min 0.8 (pulse * (1 + mag / 5)) -- variable intensity
+      haloColor = makeColor 1 1 1 alpha
+      (x, y) = (vx $ pos b, vy $ pos b)
+   in Translate x y $ Color haloColor $ ThickCircle (radiusPulse / 2) thicknessPulse
+
+-- showCharge :: Float -> String
 
 -- Update Physics
 updateBall :: (VectorSpace v, Eq v) => Int -> Int -> [Ball v] -> Ball v -> Ball v
@@ -78,7 +101,7 @@ sumForceOn cur balls = foldr vadd vzero [forceOn cur other | other <- balls, oth
 forceOn :: (VectorSpace v) => Ball v -> Ball v -> v
 forceOn Ball {pos = p1, charge = q1} Ball {pos = p2, charge = q2} =
   let r = vsub p1 p2 -- displacement vector
-      dist = max minDist (vlen r)
+      dist = max minDist (vmag r)
       dir = vnorm r
       mag = chargeConstant * q1 * q2 / (dist * dist)
    in vscale mag dir -- Coulomb's law

@@ -63,7 +63,7 @@ executable charged-particles
     -- Modules included in this executable, other than Main.
     other-modules:
         Vec,
-        BallPhysics
+        Ball
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
