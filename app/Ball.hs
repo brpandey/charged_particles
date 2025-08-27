@@ -2,7 +2,6 @@
 
 module Ball
   ( Ball (..),
-    initBalls,
     drawBall,
     drawHalo,
     updateBall,
@@ -31,13 +30,6 @@ data Ball v = Ball
     col :: Color
   }
   deriving (Eq)
-
-initBalls :: ((Float, Float) -> v) -> [Ball v]
-initBalls vctor =
-  [ Ball {pos = vctor (-150, 100), vel = vctor (40, -30), radius = 25, col = red, charge = 1},
-    Ball {pos = vctor (120, -80), vel = vctor (-30, 50), radius = 18, col = blue, charge = -1},
-    Ball {pos = vctor (-50, 60), vel = vctor (20, -20), radius = 22, col = green, charge = 1}
-  ]
 
 drawBall :: (VectorSpace v) => Ball v -> Picture
 drawBall Ball {..} = Pictures [label, ball]
