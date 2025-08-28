@@ -1,5 +1,9 @@
 # charged_particles
 
 
-https://github.com/user-attachments/assets/4435d9f9-1c7a-4ea4-9878-c2ead6e70036
+```haskell
+> cabal run charged-particles -- 7
+```
+
+https://github.com/user-attachments/assets/79d94c21-3724-49e1-b0a9-787ce9a345b5
 
