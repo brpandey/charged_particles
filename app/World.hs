@@ -41,10 +41,10 @@ width, height :: Int
 width = 800
 height = 600
 
-render :: (VectorSpace v, Eq v) => World v -> Picture
+render :: (VectorSpace v, Eq v, Monoid v) => World v -> Picture
 render w = draw (time w) (balls w)
 
-update :: (VectorSpace v, Eq v) => ViewPort -> Float -> World v -> World v
+update :: (VectorSpace v, Eq v, Monoid v) => ViewPort -> Float -> World v -> World v
 update _ t w =
   w
     { balls = map (updateBall width height b) b,
@@ -53,7 +53,7 @@ update _ t w =
   where
     b = balls w
 
-draw :: (VectorSpace v, Eq v) => Float -> [Ball v] -> Picture
+draw :: (VectorSpace v, Eq v, Monoid v) => Float -> [Ball v] -> Picture
 draw t list =
   Pictures [pair | b <- list, pair <- [drawHalo t b list, drawBall b]]
 

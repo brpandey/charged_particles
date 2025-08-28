@@ -8,7 +8,6 @@ newtype Vec2 = Vec2 (Float, Float)
   deriving (Eq, Show)
 
 class VectorSpace v where
-  vzero :: v
   vx :: v -> Float
   vy :: v -> Float
   vinit :: [Float] -> v -- create vec
@@ -23,7 +22,6 @@ class VectorSpace v where
   vmap3 :: (Float -> Float -> Float -> a) -> v -> v -> v -> [a]
 
 instance VectorSpace Vec2 where
-  vzero = Vec2 (0, 0)
   vx (Vec2 (x, _)) = x
   vy (Vec2 (_, y)) = y
   vinit [x, y] = Vec2 (x, y)
@@ -40,3 +38,9 @@ instance VectorSpace Vec2 where
   vmap f (Vec2 (x, y)) = [f x, f y]
   vmap2 f (Vec2 (a, b)) (Vec2 (c, d)) = [f a c, f b d]
   vmap3 func (Vec2 (a, b)) (Vec2 (c, d)) (Vec2 (e, f)) = [func a c e, func b d f]
+
+instance Monoid Vec2 where
+  mempty = Vec2 (0, 0)
+
+instance Semigroup Vec2 where
+  (Vec2 (x1, y1)) <> (Vec2 (x2, y2)) = Vec2 (x1 + x2, y1 + y2)

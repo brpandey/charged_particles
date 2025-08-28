@@ -41,7 +41,7 @@ drawBall Ball {..} = Pictures [label, ball]
     label = translate x (offset + y) $ color white $ scale 0.1 0.1 $ Text (showCharge charge)
 
 -- Draw halo whose size and opacity reflects force magnitude
-drawHalo :: (VectorSpace v, Eq v) => Float -> Ball v -> [Ball v] -> Picture
+drawHalo :: (VectorSpace v, Eq v, Monoid v) => Float -> Ball v -> [Ball v] -> Picture
 drawHalo t b balls =
   let accForce = sumForceOn b balls
       mag = vmag accForce
@@ -58,10 +58,8 @@ drawHalo t b balls =
       (x, y) = (vx $ pos b, vy $ pos b)
    in Translate x y $ Color haloColor $ ThickCircle (radiusPulse / 2) thicknessPulse
 
--- showCharge :: Float -> String
-
 -- Update Physics
-updateBall :: (VectorSpace v, Eq v) => Int -> Int -> [Ball v] -> Ball v -> Ball v
+updateBall :: (VectorSpace v, Eq v, Monoid v) => Int -> Int -> [Ball v] -> Ball v -> Ball v
 updateBall w h balls b =
   -- Sum all forces from other balls, assume mass = 1, acceleration = force / mass = force
   let accForce = sumForceOn b balls
@@ -87,8 +85,9 @@ checkWall pos vel bound radius = (vinit pos', vinit vel')
       | otherwise = (p, v)
 
 -- Sum force on one ball from all others
-sumForceOn :: (VectorSpace v, Eq v) => Ball v -> [Ball v] -> v
-sumForceOn cur balls = foldr vadd vzero [forceOn cur other | other <- balls, other /= cur]
+sumForceOn :: (VectorSpace v, Eq v, Monoid v) => Ball v -> [Ball v] -> v
+-- sumForceOn cur balls = foldr vadd vzero [forceOn cur other | other <- balls, other /= cur]
+sumForceOn cur balls = mconcat [forceOn cur other | other <- balls, other /= cur]
 
 forceOn :: (VectorSpace v) => Ball v -> Ball v -> v
 forceOn Ball {pos = p1, charge = q1} Ball {pos = p2, charge = q2} =
